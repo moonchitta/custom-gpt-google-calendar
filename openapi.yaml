@@ -1,21 +1,20 @@
 openapi: 3.1.0
 info:
-  title: Google Calendar Event API
+  title: Google Calendar API Integration
+  description: API for managing Google Calendar events, including creating, fetching, and updating events.
   version: 1.0.0
-  description: API for creating and managing Google Calendar events.
-
 servers:
-  - url: https://www.google.com/calendar/event
-    description: Development Server
-
+  - url: https://4b7b-2407-d000-1a-4cf4-bdd9-df33-df5c-a993.ngrok-free.app/
+    description: Local development server
 paths:
   /privacy:
     get:
       summary: Privacy Policy
-      description: Returns the privacy policy of the application.
+      description: Returns the privacy policy text as an HTML page.
+      operationId: getPrivacyPolicy
       responses:
-        "200":
-          description: HTML page containing the privacy policy.
+        200:
+          description: Privacy policy HTML content.
           content:
             text/html:
               schema:
@@ -23,11 +22,12 @@ paths:
 
   /startAuth:
     get:
-      summary: Start Google OAuth Authentication
-      description: Initiates the OAuth 2.0 flow to authenticate with Google.
+      summary: Start OAuth Authentication
+      description: Initiates the OAuth authentication flow.
+      operationId: startAuthFlow
       responses:
-        "200":
-          description: Returns the Google OAuth authorization URL.
+        200:
+          description: Authentication URL.
           content:
             application/json:
               schema:
@@ -35,14 +35,15 @@ paths:
                 properties:
                   auth_url:
                     type: string
-                    description: Google OAuth authorization URL.
+                    format: uri
 
   /handleAuth:
     get:
-      summary: Handle OAuth Authentication Callback
-      description: Handles the callback from Google OAuth and stores the access token.
+      summary: Handle OAuth Callback
+      description: Completes the OAuth authentication flow and stores user credentials.
+      operationId: handleAuthCallback
       responses:
-        "200":
+        200:
           description: Authentication successful message.
           content:
             application/json:
@@ -51,12 +52,12 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: Authentication successful!
 
   /createEvent:
     post:
       summary: Create a Google Calendar Event
       description: Creates a new event in the user's Google Calendar.
+      operationId: createCalendarEvent
       requestBody:
         required: true
         content:
@@ -67,27 +68,27 @@ paths:
                 title:
                   type: string
                   description: Title of the event.
-                  example: Team Meeting
+                  example: "Meeting with Team"
                 start_time:
                   type: string
                   format: date-time
-                  description: Start time of the event (ISO 8601 format).
-                  example: 2024-12-01T10:00:00
+                  description: Start time of the event in ISO 8601 format.
+                  example: "2024-12-05T10:00:00Z"
                 end_time:
                   type: string
                   format: date-time
-                  description: End time of the event (ISO 8601 format).
-                  example: 2024-12-01T11:00:00
+                  description: End time of the event in ISO 8601 format.
+                  example: "2024-12-05T11:00:00Z"
                 location:
                   type: string
                   description: Location of the event.
-                  example: Conference Room
+                  example: "Conference Room"
                 description:
                   type: string
                   description: Description of the event.
-                  example: Discussing Q4 goals.
+                  example: "Discussing project progress"
       responses:
-        "200":
+        200:
           description: Event created successfully.
           content:
             application/json:
@@ -96,42 +97,107 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: Event created successfully!
                   event_link:
                     type: string
-                    description: Link to the created event in Google Calendar.
-                    example: https://www.google.com/calendar/event?eid=abc123xyz
-        "400":
-          description: Bad request due to missing or invalid input.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: Title, start_time, and end_time are required.
-        "401":
-          description: User not authenticated.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: User not authenticated. Please authenticate at /startAuth.
-        "500":
+                    format: uri
+        400:
+          description: Missing or invalid input.
+        500:
           description: Internal server error.
+
+  /getEvents:
+    get:
+      summary: Get Events on a Specific Date
+      description: Fetches all events scheduled for a specific date from Google Calendar.
+      operationId: getEventsByDate
+      parameters:
+        - name: date
+          in: query
+          required: true
+          description: Date to fetch events for (format YYYY-MM-DD).
+          schema:
+            type: string
+            format: date
+      responses:
+        200:
+          description: List of events for the specified date.
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  error:
-                    type: string
-                    example: An unexpected error occurred.
+                  events:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        summary:
+                          type: string
+                        start:
+                          type: object
+                          properties:
+                            dateTime:
+                              type: string
+                              format: date-time
+                        end:
+                          type: object
+                          properties:
+                            dateTime:
+                              type: string
+                              format: date-time
+        400:
+          description: Invalid date parameter.
+        500:
+          description: Internal server error.
 
-components:
-  schemas:
-    Event:
+  /updateEvent:
+    put:
+      summary: Update a Google Calendar Event
+      description: Updates the details of an existing event by its ID.
+      operationId: updateCalendarEvent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                event_id:
+                  type: string
+                  description: The ID of the event to update.
+                  example: "abc123"
+                title:
+                  type: string
+                  description: The new title of the event.
+                start_time:
+                  type: string
+                  format: date-time
+                  description: The new start time of the event.
+                end_time:
+                  type: string
+                  format: date-time
+                  description: The new end time of the event.
+                location:
+                  type: string
+                  description: The new location of the event.
+                description:
+                  type: string
+                  description: The new description of the event.
+      responses:
+        200:
+          description: Event updated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  event:
+                    type: object
+        400:
+          description: Missing or invalid event ID.
+        500:
+          description: Internal server error.

@@ -96,3 +96,41 @@ It seems like there’s event-related information here. Would you like me to cre
 - Always validate user-provided dates and times against ISO 8601.
 - Ensure OCR outputs are summarized cleanly for better user understanding.
 - Keep the flow intuitive by guiding users step by step, ensuring they know what to do next.
+
+---
+
+### **List Events on a Specific Date**
+To retrieve events scheduled for a particular date in Google Calendar:
+- Use the `/getEvents` endpoint.
+- Provide the `date` query parameter in the `YYYY-MM-DD` format.
+- Example Request:
+  ```
+  GET /getEvents?date=2024-12-04
+  ```
+- Response:
+  - **200 OK**: Returns a list of events with details like event ID, summary, start time, and end time.
+  - **400 Bad Request**: Returned if the date parameter is missing or invalid.
+  - **500 Internal Server Error**: Indicates an issue with retrieving events.
+
+### **Edit an Existing Event**
+To update the details of an event:
+- Use the `/updateEvent` endpoint.
+- Provide the `event_id` and any fields you want to update (e.g., `title`, `start_time`, `end_time`, `location`, `description`).
+- Example Request:
+  ```
+  PUT /updateEvent
+  Content-Type: application/json
+
+  {
+    "event_id": "abc123",
+    "title": "Updated Event Title",
+    "start_time": "2024-12-05T10:00:00",
+    "end_time": "2024-12-05T11:00:00",
+    "location": "Updated Location",
+    "description": "Updated Event Description"
+  }
+  ```
+- Response:
+  - **200 OK**: Event updated successfully with the updated event details.
+  - **400 Bad Request**: Returned if the `event_id` is missing or invalid.
+  - **500 Internal Server Error**: Indicates an issue with updating the event.
