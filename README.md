@@ -62,7 +62,7 @@ pip install -r requirements.txt
 
 1. Start the Flask application:
    ```bash
-   python custom-gpt-google-calendar.py
+   python app.py
    ```
 2. Use [ngrok](https://ngrok.com/) to expose your local server:
    ```bash
@@ -143,7 +143,7 @@ pip install -r requirements.txt
 
 1. Start the Flask application:
    ```bash
-   python custom-gpt-google-calendar.py
+   python app.py
    ```
 2. Start ngrok to expose your application:
    ```bash
