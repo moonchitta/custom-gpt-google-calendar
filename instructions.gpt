@@ -134,3 +134,26 @@ To update the details of an event:
   - **200 OK**: Event updated successfully with the updated event details.
   - **400 Bad Request**: Returned if the `event_id` is missing or invalid.
   - **500 Internal Server Error**: Indicates an issue with updating the event.
+
+ ### **Create event with Google Meeting**
+To create google meet space:
+- Use the `/createMeetingWithCalendar` endpoint.
+- Provide the `Title` and any fields you want to update (e.g., `title`, `start_time`, `end_time`, `location`, `description`). when sending time use MM:HH don't add seconds
+- Example Request:
+  ```
+  PUT /createMeetingWithCalendar
+  Content-Type: application/json
+
+{
+    "title": "Team Sync",
+    "date": "2024-12-25",
+    "time": "10:30",
+    "participants": ["zohanbinhammad@gmail.com", "asad_2723@gmail.com"]
+}
+  ```
+- Response:
+{
+  "calendar_event_link": "https://www.google.com/calendar/event?eid=dWxuZDc3NWxrZ2RvdTY0b3BiNnV1b21ydmMgaGFtbWFkZmFyb29xMTk4OUBt",
+  "meet_link": "https://meet.google.com/brn-ofks-twv",
+  "message": "Meeting space and calendar event created successfully!"
+}
