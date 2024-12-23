@@ -1,10 +1,10 @@
 openapi: 3.1.0
 info:
-  title: Google Calendar API Integration
-  description: API for managing Google Calendar events, including creating, fetching, and updating events.
+  title: Google Calendar and Meet API Integration
+  description: API for managing Google Calendar events and Google Meet spaces.
   version: 1.0.0
 servers:
-  - url: https://4b7b-2407-d000-1a-4cf4-bdd9-df33-df5c-a993.ngrok-free.app/
+  - url: https://c6a1-2407-d000-1a-f44b-8cab-70b3-fad9-71c6.ngrok-free.app
     description: Local development server
 paths:
   /privacy:
@@ -13,7 +13,7 @@ paths:
       description: Returns the privacy policy text as an HTML page.
       operationId: getPrivacyPolicy
       responses:
-        200:
+        "200":
           description: Privacy policy HTML content.
           content:
             text/html:
@@ -24,9 +24,9 @@ paths:
     get:
       summary: Start OAuth Authentication
       description: Initiates the OAuth authentication flow.
-      operationId: startAuthFlow
+      operationId: startOAuthFlow
       responses:
-        200:
+        "200":
           description: Authentication URL.
           content:
             application/json:
@@ -41,9 +41,9 @@ paths:
     get:
       summary: Handle OAuth Callback
       description: Completes the OAuth authentication flow and stores user credentials.
-      operationId: handleAuthCallback
+      operationId: handleOAuthCallback
       responses:
-        200:
+        "200":
           description: Authentication successful message.
           content:
             application/json:
@@ -68,27 +68,22 @@ paths:
                 title:
                   type: string
                   description: Title of the event.
-                  example: "Meeting with Team"
                 start_time:
                   type: string
                   format: date-time
                   description: Start time of the event in ISO 8601 format.
-                  example: "2024-12-05T10:00:00Z"
                 end_time:
                   type: string
                   format: date-time
                   description: End time of the event in ISO 8601 format.
-                  example: "2024-12-05T11:00:00Z"
                 location:
                   type: string
                   description: Location of the event.
-                  example: "Conference Room"
                 description:
                   type: string
                   description: Description of the event.
-                  example: "Discussing project progress"
       responses:
-        200:
+        "200":
           description: Event created successfully.
           content:
             application/json:
@@ -100,9 +95,9 @@ paths:
                   event_link:
                     type: string
                     format: uri
-        400:
-          description: Missing or invalid input.
-        500:
+        "400":
+          description: Missing or invalid input parameters.
+        "500":
           description: Internal server error.
 
   /getEvents:
@@ -119,7 +114,7 @@ paths:
             type: string
             format: date
       responses:
-        200:
+        "200":
           description: List of events for the specified date.
           content:
             application/json:
@@ -147,9 +142,9 @@ paths:
                             dateTime:
                               type: string
                               format: date-time
-        400:
+        "400":
           description: Invalid date parameter.
-        500:
+        "500":
           description: Internal server error.
 
   /updateEvent:
@@ -167,7 +162,6 @@ paths:
                 event_id:
                   type: string
                   description: The ID of the event to update.
-                  example: "abc123"
                 title:
                   type: string
                   description: The new title of the event.
@@ -186,7 +180,7 @@ paths:
                   type: string
                   description: The new description of the event.
       responses:
-        200:
+        "200":
           description: Event updated successfully.
           content:
             application/json:
@@ -197,7 +191,61 @@ paths:
                     type: string
                   event:
                     type: object
-        400:
+        "400":
           description: Missing or invalid event ID.
-        500:
+        "500":
+          description: Internal server error.
+
+  /createMeetingWithCalendar:
+    post:
+      summary: Create Google Meet Space and Add to Calendar
+      description: >
+        Creates a Google Meet meeting space using the Meet API and then adds the generated link
+        to Google Calendar as an event with a specified title, date, and time.
+      operationId: createMeetingWithCalendar
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: Title of the meeting space and calendar event.
+                date:
+                  type: string
+                  format: date
+                  description: Date of the event (format YYYY-MM-DD).
+                time:
+                  type: string
+                  format: time
+                  description: Start time of the event (format HH:MM:SS).
+                participants:
+                  type: array
+                  items:
+                    type: string
+                    format: email
+                  description: Optional list of participant email addresses.
+      responses:
+        "200":
+          description: Meeting space and calendar event created successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  meet_link:
+                    type: string
+                    format: uri
+                    description: Link to the created Google Meet space.
+                  calendar_event_link:
+                    type: string
+                    format: uri
+                    description: Link to the created Google Calendar event.
+        "400":
+          description: Missing or invalid input parameters.
+        "500":
           description: Internal server error.
